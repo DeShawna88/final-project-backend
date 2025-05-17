@@ -3,9 +3,11 @@
 // We'll need to import jwt to use the verify method
 const jwt = require('jsonwebtoken');
 
-function verifyToken(req, res, next) {
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1]; // Extract token from header
+    if (!token) return res.status(401).json({ err: "Access Denied. No token provided." });
+
   try {
-    const token = req.headers.authorization.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Assign decoded payload to req.user
     req.user = decoded.payload;

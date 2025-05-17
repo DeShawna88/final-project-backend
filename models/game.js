@@ -3,34 +3,33 @@
 const mongoose = require('mongoose');
 
 
-const commentSchema = new mongoose.Schema(
+const reviewSchema = new mongoose.Schema(
   {
-    text: {
-      type: String,
-      required: true
-    },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    user: {
+      type: mongoose.Schema.Types.ObjectId, ref: 'User',
+      required: true },
+    rating: { type: Number, min: 0, max: 10, required: true },
+    comment: { type: String, required: true },
   },
   { timestamps: true }
 );
 
 const gameSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    text: {
-      type: String,
-      required: true,
-    },
+    title: { type: String, required: true, unique: true },
+    img: { type: String, required: false },
     genres: {
       type: String,
       required: true,
-      enum: ['Action', 'Adventure', 'Puzzle', 'Racing', 'Shooting', 'Simulation'],
+      enum: ['Action', 'Adventure', 'Platform', 'Puzzle', 'Racing', 'Shooting', 'Simulation'],
     },
+    releaseDate: { type: Date },
+    developer: { type: String },
+    publisher: { type: String },
+    platforms: [{ type: String }],  // Array of supported platforms
+    rating: { type: Number, min: 0, max: 10 },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    comments: [commentSchema], // add here
+    reviews: [reviewSchema], // Array of reviews
   },
   { timestamps: true }
 );

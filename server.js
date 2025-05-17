@@ -7,7 +7,8 @@ const cors = require('cors');
 const logger = require('morgan');
 const jwtRouter = require('./controllers/jwt');
 const authRouter = require('./controllers/auth');
-const usersRouter = require('./controllers/users')
+const usersRouter = require('./controllers/users');
+const gamesRouter = require('./controllers/games');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(logger('dev'));
 
 // Routes go here
+app.use('/games', gamesRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/jwt', jwtRouter);

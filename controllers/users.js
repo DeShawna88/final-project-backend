@@ -15,12 +15,12 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', verifyToken, async (req, res) => {
   try {
     // If the user is looking for the details of another user, block the request
     // Send a 403 status code to indicate that the user is unauthorized
     if (req.user._id !== req.params.userId){
-      return res.status(403).json({ err: "Unauthorized"});
+      return res.status(403).json({ err: "You are not allowed to view this user's details."});
     }
     const user = await User.findById(req.params.userId);
     if (!user) {

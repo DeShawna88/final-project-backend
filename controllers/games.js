@@ -5,20 +5,20 @@ const verifyToken = require("../middleware/verify-token.js");
 const Game = require("../models/game.js");
 const router = express.Router();
 
-router.post("/", verifyToken, async (req, res) => {
+
+router.post('/', verifyToken, async (req, res) => {
+    const authorId = req.user._id;
+    console.log(req.body)
     try {
-        const gameData = { ...req.body, author: req.user._id };
-        if (!req.body.title || !req.body.genre) {
-            return res.status(400).json({ err: "Title and genre are required." });
-        }
-        const game = await Game.create(gameData);
-        const response = { ...game.toObject(), author: req.user };
-        res.status(201).json(response);
+        // console.log(req.user._id);
+        let authorPackage = req.body
+        authorPackage.author = authorId
+        const game = await Game.create(req.body);
+        console.log(req.body);
+        // game._doc.author = req.user;
+        res.status(201).json(game);
     } catch (err) {
-        if (err.name === "ValidationError") {
-            return res.status(400).json({ err: "Invalid data format." });
-        }
-        res.status(500).json({ err: "Internal Server Error" });
+        res.status(500).json({ err: err.message });
     }
 });
 

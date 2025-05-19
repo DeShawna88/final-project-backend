@@ -40,4 +40,41 @@ router.get("/:gameId", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/:gameId", verifyToken, async (req, res) => {
+  try {
+    // Find the gamr:
+    const game = await Game.findById(req.params.gameId);
+    // Check permissions:
+    if (!game.author.equals(req.user._id)) {
+      return res.status(403).send("You're not allowed to do that!");
+    }
+    // Update game:
+    const updatedGame = await Game.findByIdAndUpdate(
+      req.params.gameId,
+      req.body,
+      { new: true }
+    );
+    // Append req.user to the author property:
+    updatedGame._doc.author = req.user;
+    // Issue JSON response:
+    res.status(200).json(updatedGame);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.delete("/:gameId", verifyToken, async (req, res) => {
+  try {
+    const game = await Game.findById(req.params.gameId);
+
+    if (!game.author.equals(req.user._id)) {
+      return res.status(403).send("You're not allowed to do that!");
+    }
+    const deletedGame = await Game.findByIdAndDelete(req.params.gameId);
+    res.status(200).json(deletedGame);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
 module.exports = router;

@@ -115,4 +115,22 @@ router.put("/:gameId/reviews/:reviewId", verifyToken, async (req, res) => {
   }
 });
 
+router.delete("/:gameId/reviews/:reviewId", verifyToken, async (req, res) => {
+  try {
+    const game = await Game.findById(req.params.gameId);
+    const review = game.reviews.id(req.params.reviewId);
+    if (review.author.toString() !== req.user._id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this review" });
+    }
+
+    game.reviews.remove({ _id: req.params.reviewId });
+    await game.save();
+    res.status(200).json({ message: "Review deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
 module.exports = router;

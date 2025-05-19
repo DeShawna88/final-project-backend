@@ -33,7 +33,10 @@ router.get("/", verifyToken, async (req, res) => {
 
 router.get("/:gameId", verifyToken, async (req, res) => {
   try {
-    const game = await Game.findById(req.params.gameId).populate("author");
+    const game = await Game.findById(req.params.gameId).populate([
+      'author',
+      'comments.author',
+    ]);
     res.status(200).json(game);
   } catch (err) {
     res.status(500).json({ err: err.message });
@@ -72,6 +75,22 @@ router.delete("/:gameId", verifyToken, async (req, res) => {
     }
     const deletedGame = await Game.findByIdAndDelete(req.params.gameId);
     res.status(200).json(deletedGame);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.post("/:gameId/reviews", verifyToken, async (req, res) => {
+  try {
+    req.body.author = req.user._id;
+    const game = await Game.findById(req.params.gameId);
+    game.reviews.push(req.body);
+    await game.save();
+    // Find the newly created review:
+    const newReview = game.reviews[game.reviews.length - 1];
+    newReview._doc.author = req.user;
+    // Respond with the newReview:
+    res.status(201).json(newReview);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }

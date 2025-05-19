@@ -35,7 +35,7 @@ router.get("/:gameId", verifyToken, async (req, res) => {
   try {
     const game = await Game.findById(req.params.gameId).populate([
       'author',
-      'comments.author',
+      'reviews.author',
     ]);
     res.status(200).json(game);
   } catch (err) {
@@ -91,6 +91,25 @@ router.post("/:gameId/reviews", verifyToken, async (req, res) => {
     newReview._doc.author = req.user;
     // Respond with the newReview:
     res.status(201).json(newReview);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.put("/:gameId/reviews/:reviewId", verifyToken, async (req, res) => {
+  try {
+    const game = await Game.findById(req.params.gameId);
+    const review = game.reviews.id(req.params.reviewId);
+    // ensures the current user is the author of the review
+    if (review.author.toString() !== req.user._id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this review" });
+    }
+
+    review.comment = req.body.comment;
+    await game.save();
+    res.status(200).json({ message: "Review updated successfully" });
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
